@@ -510,12 +510,20 @@ class PeftTrainer:
     self._buffered_train_metrics = None
 
   def _write_metrics(self, metrics_buffer: MetricsBuffer):
+    # Convert JAX arrays to NumPy arrays before applying aggregation operations
+      def _to_numpy(x):
+        """Convert JAX arrays to NumPy arrays."""
+        if isinstance(x, jax.Array):
+          return np.array(x)
+        elif isinstance(x, list):
+          return [_to_numpy(item) for item in x]
+        return x
     self._log_metrics(
         loss=metrics_buffer.loss,
         step=metrics_buffer.step,
         step_time_delta=metrics_buffer.step_time_delta,
         additional_metrics={
-            k: op(v)
+            k: op(_to_numpy(v))
             for k, (
                 v,
                 op,
