@@ -511,7 +511,7 @@ class PeftTrainer:
 
   def _write_metrics(self, metrics_buffer: MetricsBuffer):
     # Convert JAX arrays to NumPy arrays before applying aggregation operations
-      def _to_numpy(x):
+    def _to_numpy(x):
         """Convert JAX arrays to NumPy arrays."""
         if isinstance(x, jax.Array):
           return np.array(x)
