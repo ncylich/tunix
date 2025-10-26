@@ -82,7 +82,6 @@ def log_to_wandb(
     scalar_value: float | np.ndarray,
     **kwargs: str | int,
 ):
-  import ipdb; ipdb.set_trace()
   """Creates a W&B event listener for jax.monitoring.
 
   Args:
@@ -127,7 +126,7 @@ def register_jax_monitoring(metrics_logger_options: MetricsLoggerOptions):
   # Register Weights & Biases backend.
   if wandb is not None:
     wandb_run_name = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    wandb.init(project="tunix", name=wandb_run_name, anonymous="allow")
+    wandb.init(project="tunix", name=wandb_run_name, anonymous="allow", settings=wandb.Settings(console="off"))
     if wandb.run:
       logging.info("W&B run URL: %s", wandb.run.url)
     jax.monitoring.register_scalar_listener(log_to_wandb)
