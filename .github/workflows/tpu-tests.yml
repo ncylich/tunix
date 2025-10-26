@@ -102,7 +102,9 @@ jobs:
         # tokenizer_adapter_test requires access to gated repo
         python -m pytest tests/generate/ -v --tb=short \
           --ignore=tests/generate/vllm_sampler_test.py \
-          --ignore=tests/generate/tokenizer_adapter_test.py
+          --ignore=tests/generate/vllm_driver_test.py \
+          --ignore=tests/generate/tokenizer_adapter_test.py \
+          --ignore=tests/generate/sglang_jax_sampler_test.py
 
     - name: Run tunix SFT tests
       run: |
@@ -161,7 +163,7 @@ jobs:
     - name: Run tunix tests not covered by the above categories
       run: |
         # This category is to catch tests added but not covered by CI yet. Whenever you add new folders under tests/, please add a new category above and skip those tests here.
-        python -m pytest tests/ -v --tb=short --ignore=tests/models/ --ignore=tests/cli/ --ignore=tests/generate/ --ignore=tests/sft/ --ignore=tests/distillation/ --ignore=tests/rl/ || code=$?
+        python -m pytest tests/ -v --tb=short --ignore=tests/model_alignment/ --ignore=tests/models/ --ignore=tests/cli/ --ignore=tests/generate/ --ignore=tests/sft/ --ignore=tests/distillation/ --ignore=tests/rl/ || code=$?
         if [ "${code:-0}" = "5" ]; then
           echo "No tests collected (expected)."
           exit 0
@@ -193,7 +195,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Tunix and tpu-inference
+      - name: Setup Tunix , tpu-inference and dependencies
         run: |
           echo "Current directory:"
           pwd
@@ -212,5 +214,19 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          pytest tests/generate/vllm_sampler_test.py -v --tb=short
+          pytest tests/generate/vllm_driver_test.py -v --tb=short
+          pytest tests/generate/vllm_sampler_test.py   --collect-only -q   --no-header --no-summary --disable-warnings | grep '::' > test_collections.txt
+          while read -r test; do
+            pytest "$test" -v --tb=short
+          done < test_collections.txt
 
+      - name: Run install sglang-jax && test
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          ## because sglang-jax has codes like jax.local_devices('cpu')
+          unset JAX_PLATFORMS 
+          cd ..
+          git clone https://github.com/sgl-project/sglang-jax.git && cd sglang-jax/python && pip install -e . && cd ../..
+          cd tunix && python tests/generate/sglang_jax_sampler_test.py 
+          
