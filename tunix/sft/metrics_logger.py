@@ -82,6 +82,7 @@ def log_to_wandb(
     scalar_value: float | np.ndarray,
     **kwargs: str | int,
 ):
+  import ipdb; ipdb.set_trace()
   """Creates a W&B event listener for jax.monitoring.
 
   Args:
