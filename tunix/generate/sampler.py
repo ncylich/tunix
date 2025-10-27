@@ -454,7 +454,6 @@ class Sampler(base_sampler.BaseSampler):
           next_token_candidate
       )
 
-    import ipdb; ipdb.set_trace()
     done = done | jnp.isin(token_buffer[:, decoding_step + 1], eos)
     return _SamplingState(
         decoding_step=sampler_state.decoding_step + 1,
