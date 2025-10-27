@@ -14,7 +14,8 @@ from tensorboardX import writer
 try:
   # pylint: disable=g-import-not-at-top
   # pytype: disable=import-error
-  import wandb
+  # import wandb
+  wandb = None
 except ImportError:
   wandb = None
   logging.info("Could not import `wandb`. Logging to W&B not possible.")
