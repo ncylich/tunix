@@ -249,6 +249,13 @@ class VllmSamplerTest(absltest.TestCase):
         tokenizer=tokenizer,
         config=vllm_config,
     )
+    assert vllm_sampler.transformer is not None, (
+        "vLLM model is not available."
+    )
+    assert vllm_sampler.transformer_state is not None, (
+        "vLLM state is not available."
+    )
+
     self.addCleanup(vl_sampler.stop)
 
     state = nnx.state(tunix_model)
